@@ -3,7 +3,52 @@ const client = new Discord.Client();
 const mongodb = require('mongodb');
 
 const MongoClient = mongodb.MongoClient;
-const uri = "mongodb+srv://<your_mongo_db_uri_here>";
+const uri = "const Discord = require('discord.js');
+const client = new Discord.Client();
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/test?retryWrites=true&w=majority";
+const clientDb = new MongoClient(uri, { useNewUrlParser: true });
+
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.on('message', msg => {
+  if (!msg.content.startsWith('/judge ban')) return;
+  
+  const bannedUser = msg.content.split(" ")[2];
+  const reason = msg.content.split(" ").slice(3).join(" ");
+  const server = msg.guild.name;
+  
+  clientDb.connect(err => {
+    const banDb = clientDb.db("ban_db").collection("banned_users");
+    banDb.insertOne({ discordId: bannedUser, reason: reason, server: server }, (err, res) => {
+      console.log("Ban entry added to database");
+    });
+  });
+  
+  msg.channel.send(`Banned user: ${bannedUser}\nReason: ${reason}\nServer: ${server}`);
+});
+
+client.on('message', msg => {
+  if (!msg.content.startsWith('/judge view')) return;
+  
+  const bannedUser = msg.content.split(" ")[2];
+  
+  clientDb.connect(err => {
+    const banDb = clientDb.db("ban_db").collection("banned_users");
+    banDb.findOne({ discordId: bannedUser }, (err, result) => {
+      if (result) {
+        msg.channel.send(`Banned user: ${result.discordId}\nReason: ${result.reason}\nServer: ${result.server}`);
+      } else {
+        msg.channel.send(`No ban entry found for user: ${bannedUser}`);
+      }
+    });
+  });
+});
+
+client.login('YOUR_DISCORD_BOT_TOKEN');
+";
 
 let bannedUsers;
 
